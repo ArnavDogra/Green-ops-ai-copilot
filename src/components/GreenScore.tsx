@@ -2,12 +2,22 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { ShieldAlert, CheckCircle2, AlertTriangle, XCircle, UploadCloud, GitBranch } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, AlertTriangle, XCircle, UploadCloud, GitBranch, Github, Terminal, Check } from 'lucide-react';
 import { useState } from 'react';
 
 export default function GreenScore() {
   const [analyzing, setAnalyzing] = useState(false);
   const [score, setScore] = useState<null | any>(null);
+  
+  // Git Repo Modal State
+  const [gitModalOpen, setGitModalOpen] = useState(false);
+  const [gitRepoUrl, setGitRepoUrl] = useState('');
+  const [gitAuthStatus, setGitAuthStatus] = useState<'idle'|'authenticating'>('idle');
+
+  // AI Fix Modal State
+  const [fixing, setFixing] = useState(false);
+  const [fixStep, setFixStep] = useState(0);
+  const [prCreated, setPrCreated] = useState(false);
 
   const handleAnalyze = () => {
     setAnalyzing(true);
@@ -23,6 +33,27 @@ export default function GreenScore() {
         ]
       });
     }, 2000);
+  };
+
+  const handleGitConnect = () => {
+    if (!gitRepoUrl) return;
+    setGitAuthStatus('authenticating');
+    setTimeout(() => {
+      setGitModalOpen(false);
+      setGitAuthStatus('idle');
+      handleAnalyze();
+    }, 1500);
+  };
+
+  const handleFixes = () => {
+    setFixing(true);
+    setFixStep(1);
+    setTimeout(() => setFixStep(2), 1500);
+    setTimeout(() => setFixStep(3), 3000);
+    setTimeout(() => {
+      setFixing(false);
+      setPrCreated(true);
+    }, 4500);
   };
 
   return (
@@ -45,7 +76,7 @@ export default function GreenScore() {
             </div>
             
             <div 
-              onClick={handleAnalyze}
+              onClick={() => setGitModalOpen(true)}
               className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:border-green-500 dark:hover:border-green-400 hover:bg-green-500/5 transition-all"
             >
               <GitBranch className="w-12 h-12 text-slate-400 mb-4" />
@@ -103,13 +134,94 @@ export default function GreenScore() {
               >
                 Analyze Another
               </button>
-              <button className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 text-slate-900 text-sm font-bold rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 flex items-center gap-2">
+              <button 
+                onClick={handleFixes}
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 text-slate-900 text-sm font-bold rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 flex items-center gap-2"
+              >
                 <ShieldAlert className="w-5 h-5" /> Apply AI Fixes Automatically
               </button>
             </div>
           </motion.div>
         )}
       </div>
+
+      {/* Git Repo Connect Modal */}
+      {gitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <motion.div initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Github className="w-6 h-6" /> Connect Repository
+              </h3>
+              <button onClick={() => setGitModalOpen(false)} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"><XCircle className="w-6 h-6" /></button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">GitHub Repository URL</label>
+                <input 
+                  type="text" 
+                  value={gitRepoUrl}
+                  onChange={(e) => setGitRepoUrl(e.target.value)}
+                  placeholder="https://github.com/username/repo" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <button 
+                onClick={handleGitConnect}
+                disabled={!gitRepoUrl || gitAuthStatus !== 'idle'}
+                className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
+              >
+                {gitAuthStatus === 'authenticating' ? (
+                  <><div className="w-5 h-5 border-2 border-slate-500 border-t-white dark:border-t-slate-900 rounded-full animate-spin"></div> Authenticating...</>
+                ) : (
+                  <><Github className="w-5 h-5" /> Authenticate & Scan</>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* AI Fixing Modal */}
+      {(fixing || prCreated) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <motion.div initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} className="bg-slate-900 w-full max-w-lg rounded-2xl p-8 border border-slate-700 shadow-2xl relative overflow-hidden">
+            {fixing && (
+              <div className="flex flex-col items-center justify-center py-6">
+                <div className="w-16 h-16 border-4 border-slate-700 border-t-green-500 rounded-full animate-spin mb-6"></div>
+                <h3 className="text-xl font-bold text-white mb-2">AI Auto-Fixer</h3>
+                <div className="space-y-3 mt-6 w-full font-mono text-sm">
+                  <div className={`flex items-center gap-3 ${fixStep >= 1 ? 'text-green-400' : 'text-slate-600'}`}>
+                    <Terminal className="w-4 h-4" /> <span>Analyzing dependency graph...</span>
+                  </div>
+                  <div className={`flex items-center gap-3 ${fixStep >= 2 ? 'text-green-400' : 'text-slate-600'}`}>
+                    <Terminal className="w-4 h-4" /> <span>Rewriting Dockerfile to Alpine base...</span>
+                  </div>
+                  <div className={`flex items-center gap-3 ${fixStep >= 3 ? 'text-green-400' : 'text-slate-600'}`}>
+                    <Terminal className="w-4 h-4" /> <span>Committing to new branch 'greenops-fix'...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            {prCreated && (
+              <div className="flex flex-col items-center text-center py-6">
+                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
+                  <Check className="w-10 h-10 text-green-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">Pull Request Created!</h3>
+                <p className="text-slate-400 mb-6">The AI has successfully created PR #42 with all the suggested optimizations. Merging this will reduce your projected emissions by 14%.</p>
+                <div className="flex gap-4 w-full">
+                  <button onClick={() => setPrCreated(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors">Close</button>
+                  <a href="#" className="flex-1 py-3 bg-green-500 hover:bg-green-400 text-slate-900 font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <Github className="w-5 h-5" /> View PR
+                  </a>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

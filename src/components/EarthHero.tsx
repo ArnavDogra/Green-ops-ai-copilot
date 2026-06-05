@@ -8,7 +8,7 @@ const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
 
 export default function EarthHero({ isDark = true }: { isDark?: boolean }) {
   const [mounted, setMounted] = useState(false);
-  const globeEl = useRef<any>();
+  const globeEl = useRef<any>(null);
 
   useEffect(() => {
     setMounted(true);
