@@ -39,7 +39,7 @@ export default function AICopilot() {
       
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
       setLoading(false);
-    } catch (e) {
+    } catch {
       // Mock fallback for Vercel deployment where localhost:8000 isn't available
       setTimeout(() => {
         setMessages(prev => [...prev, { 
