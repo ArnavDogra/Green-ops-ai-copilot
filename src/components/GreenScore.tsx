@@ -199,7 +199,7 @@ export default function GreenScore() {
                     <Terminal className="w-4 h-4" /> <span>Rewriting Dockerfile to Alpine base...</span>
                   </div>
                   <div className={`flex items-center gap-3 ${fixStep >= 3 ? 'text-green-400' : 'text-slate-600'}`}>
-                    <Terminal className="w-4 h-4" /> <span>Committing to new branch 'greenops-fix'...</span>
+                    <Terminal className="w-4 h-4" /> <span>Committing to new branch &apos;greenops-fix&apos;...</span>
                   </div>
                 </div>
               </div>
