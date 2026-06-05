@@ -214,7 +214,7 @@ export default function GreenScore() {
                 <div className="flex gap-4 w-full">
                   <button onClick={() => setPrCreated(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors">Close</button>
                   <a href="#" className="flex-1 py-3 bg-green-500 hover:bg-green-400 text-slate-900 font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
-                    <Github className="w-5 h-5" /> View PR
+                    <GitMerge className="w-5 h-5" /> View PR
                   </a>
                 </div>
               </div>
