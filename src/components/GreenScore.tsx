@@ -12,12 +12,15 @@ export default function GreenScore() {
   // Git Repo Modal State
   const [gitModalOpen, setGitModalOpen] = useState(false);
   const [gitRepoUrl, setGitRepoUrl] = useState('');
-  const [gitAuthStatus, setGitAuthStatus] = useState<'idle'|'authenticating'>('idle');
+  const [githubToken, setGithubToken] = useState('');
+  const [gitAuthStatus, setGitAuthStatus] = useState<'idle'|'authenticating'|'error'>('idle');
+  const [authError, setAuthError] = useState('');
 
   // AI Fix Modal State
   const [fixing, setFixing] = useState(false);
   const [fixStep, setFixStep] = useState(0);
   const [prCreated, setPrCreated] = useState(false);
+  const [prUrl, setPrUrl] = useState('#');
 
   const handleAnalyze = () => {
     setAnalyzing(true);
@@ -35,25 +38,55 @@ export default function GreenScore() {
     }, 2000);
   };
 
-  const handleGitConnect = () => {
+  const handleGitConnect = async () => {
     if (!gitRepoUrl) return;
     setGitAuthStatus('authenticating');
-    setTimeout(() => {
+    setAuthError('');
+    try {
+      const res = await fetch('http://localhost:8000/api/github/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo_url: gitRepoUrl, github_token: githubToken || undefined })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Scan failed');
+      
+      setScore(data.score);
       setGitModalOpen(false);
       setGitAuthStatus('idle');
-      handleAnalyze();
-    }, 1500);
+    } catch (err: any) {
+      setGitAuthStatus('error');
+      setAuthError(err.message);
+    }
   };
 
-  const handleFixes = () => {
+  const handleFixes = async () => {
     setFixing(true);
     setFixStep(1);
-    setTimeout(() => setFixStep(2), 1500);
-    setTimeout(() => setFixStep(3), 3000);
-    setTimeout(() => {
+    
+    const stepInterval = setInterval(() => {
+      setFixStep(prev => (prev < 3 ? prev + 1 : prev));
+    }, 2000);
+
+    try {
+      const res = await fetch('http://localhost:8000/api/github/fix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo_url: gitRepoUrl, github_token: githubToken || undefined })
+      });
+      const data = await res.json();
+      clearInterval(stepInterval);
+      setFixStep(3);
+      if (!res.ok) throw new Error(data.detail || 'Fix failed');
+      
+      setPrUrl(data.pr_url);
       setFixing(false);
       setPrCreated(true);
-    }, 4500);
+    } catch (err: any) {
+      clearInterval(stepInterval);
+      setFixing(false);
+      alert("Error creating PR: " + err.message);
+    }
   };
 
   return (
@@ -164,9 +197,19 @@ export default function GreenScore() {
                   value={gitRepoUrl}
                   onChange={(e) => setGitRepoUrl(e.target.value)}
                   placeholder="https://github.com/username/repo" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-green-500 mb-4"
+                />
+                
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">GitHub Personal Access Token (For PRs)</label>
+                <input 
+                  type="password" 
+                  value={githubToken}
+                  onChange={(e) => setGithubToken(e.target.value)}
+                  placeholder="ghp_..." 
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-green-500"
                 />
               </div>
+              {authError && <p className="text-red-500 text-sm font-medium">{authError}</p>}
               <button 
                 onClick={handleGitConnect}
                 disabled={!gitRepoUrl || gitAuthStatus !== 'idle'}
@@ -213,7 +256,7 @@ export default function GreenScore() {
                 <p className="text-slate-400 mb-6">The AI has successfully created PR #42 with all the suggested optimizations. Merging this will reduce your projected emissions by 14%.</p>
                 <div className="flex gap-4 w-full">
                   <button onClick={() => setPrCreated(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors">Close</button>
-                  <a href="#" className="flex-1 py-3 bg-green-500 hover:bg-green-400 text-slate-900 font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
+                  <a href={prUrl} target="_blank" rel="noopener noreferrer" className="flex-1 py-3 bg-green-500 hover:bg-green-400 text-slate-900 font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
                     <GitMerge className="w-5 h-5" /> View PR
                   </a>
                 </div>
