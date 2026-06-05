@@ -2,7 +2,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { ShieldAlert, CheckCircle2, AlertTriangle, XCircle, UploadCloud, GitBranch, Github, Terminal, Check } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, AlertTriangle, XCircle, UploadCloud, GitBranch, GitMerge, Terminal, Check } from 'lucide-react';
 import { useState } from 'react';
 
 export default function GreenScore() {
@@ -151,7 +151,7 @@ export default function GreenScore() {
           <motion.div initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Github className="w-6 h-6" /> Connect Repository
+                <GitMerge className="w-6 h-6" /> Connect Repository
               </h3>
               <button onClick={() => setGitModalOpen(false)} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"><XCircle className="w-6 h-6" /></button>
             </div>
@@ -175,7 +175,7 @@ export default function GreenScore() {
                 {gitAuthStatus === 'authenticating' ? (
                   <><div className="w-5 h-5 border-2 border-slate-500 border-t-white dark:border-t-slate-900 rounded-full animate-spin"></div> Authenticating...</>
                 ) : (
-                  <><Github className="w-5 h-5" /> Authenticate & Scan</>
+                  <><GitMerge className="w-5 h-5" /> Authenticate & Scan</>
                 )}
               </button>
             </div>
