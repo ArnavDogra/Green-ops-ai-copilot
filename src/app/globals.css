@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: 220 20% 8%; /* Very dark blue-gray */
+  --foreground: 210 40% 98%;
+  --card: 222 24% 12%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 24% 12%;
+  --popover-foreground: 210 40% 98%;
+  
+  /* Neon Green for Primary */
+  --primary: 142 71% 45%; 
+  --primary-foreground: 144 100% 11%;
+  
+  --secondary: 217 24% 20%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 24% 20%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217 24% 20%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 24% 20%;
+  --input: 217 24% 20%;
+  --ring: 142 71% 45%;
+  --radius: 0.75rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.neon-glow {
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.7), 0 0 20px rgba(74, 222, 128, 0.5);
+}
+
+.neon-border {
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.2), inset 0 0 10px rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.5);
 }
